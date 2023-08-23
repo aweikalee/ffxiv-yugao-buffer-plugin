@@ -19,10 +19,9 @@ Object.keys(fish).forEach((id) => {
   }
 })
 
-const fishReg = /成功钓上了(.+?)?（(.+)）。$/
+const fishReg = /成功钓上了(.+?)??（(.+)）。$/
 
 function onLogLine(data) {
-  console.log(data)
   const { type, line, rawLine } = data
   if (type !== "LogLine") return
   if (!Array.isArray(line)) return
