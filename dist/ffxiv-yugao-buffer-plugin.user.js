@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FF14 鱼糕增强插件
 // @namespace    ffxiv-yugao-buffer-plugin
-// @version      1.0.1
+// @version      1.1.0
 // @author       毛呆
 // @description  为鱼糕网页版增加自动标记已完成的功能。
 // @license      MIT
@@ -168,16 +168,72 @@ Please register your listeners before calling startOverlayEvents().`);
     contentRef.removeChild(tagRef);
     tagRef = void 0;
   });
+  function insertAchieveCheckbox({ store: store2, fishMap: fishMap2 }) {
+    const achieveMap = {
+      愿者上钩: [],
+      净界太公: [],
+      太公仙路: [],
+      晓月太公: []
+    };
+    store2.state.bigFish.forEach((id) => {
+      const fish2 = fishMap2.get(id);
+      if (!fish2) {
+        console.debug("[Log 未找到鱼王]", id);
+        return;
+      }
+      if (fish2.patch < 5) {
+        achieveMap["愿者上钩"].push(id);
+        achieveMap["太公仙路"].push(id);
+      }
+      if (fish2.patch >= 5 && fish2.patch < 6) {
+        achieveMap["净界太公"].push(id);
+        achieveMap["太公仙路"].push(id);
+      }
+      if (fish2.patch >= 6 && fish2.patch < 7) {
+        achieveMap["晓月太公"].push(id);
+      }
+    });
+    Array.from(document.querySelectorAll(".v-subheader")).forEach((el) => {
+      const title = el.innerText.trim();
+      if (!(title in achieveMap))
+        return;
+      const button = document.createElement("button");
+      el.appendChild(button);
+      button.innerHTML = "标记为已获得";
+      button.title = "将该成就下所有鱼王标记为已获得";
+      button.style.border = "1px solid #979797";
+      button.style.borderRadius = "4px";
+      button.style.background = "rgba(128, 128, 128, 0.5)";
+      button.style.marginLeft = "20px";
+      button.style.padding = "0 4px";
+      button.addEventListener("click", () => {
+        store2.commit("batchSetFishCompleted", {
+          fishIds: achieveMap[title],
+          completed: true
+        });
+      });
+    });
+  }
+  function getInstance() {
+    const app = document.getElementById("app");
+    return app.__vue__;
+  }
+  function getStore() {
+    const instance = getInstance();
+    return instance.$store;
+  }
   window.addOverlayListener("LogLine", onLogLine);
   window.startOverlayEvents();
   const store = getStore();
   const fish = store.state.fish;
+  const fishNameToIdMap = /* @__PURE__ */ new Map();
   const fishMap = /* @__PURE__ */ new Map();
   Object.keys(fish).forEach((id) => {
     const name = store.getters.getItemName(id);
     if (name) {
-      const _id = id.length > 6 ? id.slice(-6) : id;
-      fishMap.set(name, Number(_id));
+      const _id = Number(id.length > 6 ? id.slice(-6) : id);
+      fishNameToIdMap.set(name, _id);
+      fishMap.set(_id, fish[id]);
     }
   });
   const fishReg = /成功钓上了(.+?)??（(.+)）。$/;
@@ -198,7 +254,7 @@ Please register your listeners before calling startOverlayEvents().`);
     }
     const [, fishName] = match;
     console.log(`成功钓上了 ${fishName}`);
-    const id = fishMap.get(fishName);
+    const id = fishNameToIdMap.get(fishName);
     if (!id) {
       return;
     }
@@ -207,10 +263,32 @@ Please register your listeners before calling startOverlayEvents().`);
       completed: true
     });
   }
-  function getStore() {
-    const app = document.getElementById("app");
-    const instance = app.__vue__;
-    return instance.$store;
-  }
+  let achieveTimer;
+  getInstance().$watch(
+    "$route.path",
+    function(path) {
+      if (path === "/wiki") {
+        let whileFind2 = function() {
+          if (achieveTimer)
+            clearTimeout(achieveTimer);
+          const el = Array.from(document.querySelectorAll(".v-subheader")).find(
+            (el2) => el2.innerText.trim() === "专研钓鱼笔记"
+          );
+          if (el) {
+            insertAchieveCheckbox({ store, fishMap });
+          } else {
+            achieveTimer = setTimeout(whileFind2, 1e3);
+          }
+        };
+        whileFind2();
+      } else {
+        if (achieveTimer)
+          clearTimeout(achieveTimer);
+      }
+    },
+    {
+      immediate: true
+    }
+  );
 
 })();
