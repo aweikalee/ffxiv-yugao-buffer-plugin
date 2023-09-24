@@ -37,6 +37,8 @@ function onLogLine(data) {
   if (logType !== "00") return
   if (name) return // 必须是匿名消息
 
+  if (code !== '0843') return // 过滤其他人获得消息
+
   const match = message.match(fishReg)
   if (!match) {
     if (isDev) console.debug("[Log 系统消息]", rawLine)
