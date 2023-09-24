@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FF14 鱼糕增强插件
 // @namespace    ffxiv-yugao-buffer-plugin
-// @version      1.1.1
+// @version      1.1.2
 // @author       毛呆
 // @description  为鱼糕网页版增加自动标记已完成的功能。
 // @license      MIT
@@ -247,6 +247,8 @@ Please register your listeners before calling startOverlayEvents().`);
     if (logType !== "00")
       return;
     if (name)
+      return;
+    if (code !== "0843")
       return;
     const match = message.match(fishReg);
     if (!match) {
