@@ -2,7 +2,8 @@
  * fork from https://github.com/ngld/OverlayPlugin/blob/master/docs/assets/shared/common.js
  */
 ;(function () {
-  let wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(location.href)
+  let href =  decodeURIComponent(location.href)
+  let wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(href)
   let ws = null
   let queue = []
   let rseqCounter = 0
