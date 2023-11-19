@@ -2,7 +2,7 @@
  * fork from https://github.com/ngld/OverlayPlugin/blob/master/docs/assets/shared/common.js
  */
 ;(function () {
-  let href =  decodeURIComponent(location.href)
+  let href = decodeURIComponent(location.href)
   let wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(href)
   let ws = null
   let queue = []
@@ -12,10 +12,7 @@
   let sendMessage = null
   let eventsStarted = false
   if (!wsUrl) {
-    wsUrl = [
-      '?OVERLAY_WS=ws://127.0.0.1:10501/ws',
-      'ws://127.0.0.1:10501/ws'
-    ]
+    wsUrl = ["?OVERLAY_WS=ws://127.0.0.1:10501/ws", "ws://127.0.0.1:10501/ws"]
   }
 
   if (wsUrl) {
