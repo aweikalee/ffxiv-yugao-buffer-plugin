@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FF14 鱼糕增强插件
 // @namespace    ffxiv-yugao-buffer-plugin
-// @version      1.1.2
+// @version      1.1.3
 // @author       毛呆
 // @description  为鱼糕网页版增加自动标记已完成的功能。
 // @license      MIT
@@ -12,7 +12,8 @@
   'use strict';
 
   (function() {
-    let wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(location.href);
+    let href = decodeURIComponent(location.href);
+    let wsUrl = /[\?&]OVERLAY_WS=([^&]+)/.exec(href);
     let ws = null;
     let queue = [];
     let rseqCounter = 0;
